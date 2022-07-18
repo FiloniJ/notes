@@ -56,6 +56,23 @@
       @newTask='newTask'
       :success="success"
     ></add-task>
+    <the-modal
+      :showModal="showModal"
+      @closeModal="showModal = false"
+    >
+      <template v-slot:header>
+        <h4>Вы действительно хотите удалить запись</h4>
+      </template>
+      <template v-slot:body>
+        {{ deleteText.note }}
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-danger"
+          @click="deleteItem(deleteText.id)"
+        >Удалить</button>
+      </template>
+    </the-modal>
   </div>
 </template>
 
@@ -65,9 +82,8 @@ import AddTask from './AddTask.vue'
 import { dateDif } from '@/utils/DateTime'
 import axios from 'axios'
 import { useStore } from 'vuex'
-import TheSpinner from '../shared/TheSpinner.vue'
 
-defineComponent({ AddTask, TheSpinner })
+defineComponent({ AddTask })
 
 const status = ['Активные', 'Просроченные', 'Выполненные']
 const term = ['Срочные', 'Обычные', 'Необязательные']
@@ -76,6 +92,8 @@ const periodDays = [1, 7, 30]
 const store = useStore()
 const localhost = store.getters.domain
 const loading = ref()
+const showModal = ref()
+const deleteText = ref()
 
 const tasks = ref([])
 
@@ -172,11 +190,17 @@ const doneTask = async id => {
     })
 }
 // delete
-const deleteTask = async id => {
+const deleteTask = id => {
+  showModal.value = true
+  deleteText.value = tasks.value.find(el => el.id === id)
+}
+
+const deleteItem = async id => {
   await axios.delete(localhost + `api/tasks/${id}`)
     .then(() => {
       const idx = tasks.value.findIndex(el => el.id === id)
       tasks.value.splice(idx, 1)
+      showModal.value = false
     })
 }
 </script>

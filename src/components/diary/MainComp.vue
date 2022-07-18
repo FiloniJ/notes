@@ -39,6 +39,23 @@
       :success="success"
       :noteMaxLength="noteMaxLength"
     />
+    <the-modal
+      :showModal="showModal"
+      @closeModal="showModal = false"
+    >
+      <template v-slot:header>
+        <h4>Вы действительно хотите удалить запись</h4>
+      </template>
+      <template v-slot:body>
+        {{ deleteText.note }}
+      </template>
+      <template v-slot:footer>
+        <button
+          class="btn btn-danger"
+          @click="deleteItem(deleteText.id)"
+        >Удалить</button>
+      </template>
+    </the-modal>
   </div>
 </template>
 
@@ -46,12 +63,14 @@
 import { defineComponent, ref, reactive, onMounted, watch } from 'vue'
 import AddDiary from './AddDiary.vue'
 import NotesList from './NotesList.vue'
-import TheSpinner from '../shared/TheSpinner.vue'
 import axios from 'axios'
 import { useStore } from 'vuex'
 
-defineComponent({ AddDiary, NotesList, TheSpinner })
+defineComponent({ AddDiary, NotesList })
 const localhost = useStore().getters.domain
+
+const showModal = ref()
+const deleteText = ref()
 
 const noteMaxLength = 500
 
@@ -168,11 +187,17 @@ const saveChanges = async text => {
 }
 // delete
 const deleteNote = async id => {
+  showModal.value = true
+  deleteText.value = data.value.find(el => el.id === id)
+}
+
+const deleteItem = async id => {
   await axios.delete(localhost + `api/diary/${id}`)
     .then(() => {
       const idx = data.value.findIndex(el => el.id === id)
       data.value.splice(idx, 1)
       updateFilteredData()
+      showModal.value = false
     })
 }
 </script>

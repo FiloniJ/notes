@@ -1,17 +1,12 @@
 <template>
-  <component :is="layout + '-layout'"></component>
   <menu-layout />
 </template>
 
 <script setup>
 
-import { useRoute } from 'vue-router'
-import { computed, defineComponent } from 'vue'
+import { defineComponent } from 'vue'
 import LoginLayout from './layouts/LoginLayout'
 import MenuLayout from './layouts/MenuLayout'
-
-const route = useRoute()
-const layout = computed(() => route.meta.layout)
 
 defineComponent({ LoginLayout, MenuLayout })
 
